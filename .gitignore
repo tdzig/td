@@ -1,0 +1,14 @@
+# Build artifacts
+.zig-cache/
+zig-out/
+zig-out-dist/
+/result
+
+# Secrets: auth keys and session files — never commit
+/auth_key.bin
+/session.bin
+/session-invoke.bin
+*.session
+
+# Tool state
+.mimosa/

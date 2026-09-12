@@ -1,0 +1,8 @@
+id	message
+2FA_CONFIRM_WAIT_X	Reset in {value} seconds.
+ABOUT_TOO_LONG	About string too long.
+AUTH_RESTART	Restart the authorization.
+AUTH_RESTART_X	Restart the authorization after a "pause" of {value} seconds.
+FLOOD_WAIT_X	Please wait {value} seconds before repeating the action.
+PHONE_CODE_INVALID	The provided phone code is invalid.
+apiCallError	skipped: ids must match [A-Z0-9][A-Z0-9_]*

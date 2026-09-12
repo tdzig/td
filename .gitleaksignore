@@ -1,0 +1,13 @@
+# Verified false positives: the flagged hex values are the official,
+# publicly documented MTProto auth-key worked example from
+# https://core.telegram.org/mtproto/samples-auth_key — deterministic
+# known-answer constants embedded by every MTProto implementation, not
+# secrets.
+kat_values.txt:generic-api-key:5
+src/crypto/mod.zig:generic-api-key:24
+src/mtproto/inner.zig:generic-api-key:133
+src/mtproto/inner.zig:generic-api-key:140
+src/mtproto/inner.zig:generic-api-key:144
+tests/data/auth_key_sample.html:generic-api-key:521
+tests/data/auth_key_sample.html:generic-api-key:712
+tests/data/auth_key_sample.html:generic-api-key:816

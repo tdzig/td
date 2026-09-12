@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: build + test (Zig via nix)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v30
+
+      # Unit + integration + golden + official-schema codegen tests,
+      # including the new multi-session, fuzz-corpus and compliance
+      # suites. Zig is provided through nix (see justfile).
+      - name: just build && just test
+        run: |
+          nix run nixpkgs#just -- build
+          nix run nixpkgs#just -- test
+
+      # The committed generated API must be reproducible: regenerating
+      # it from the vendored schema may not change a byte.
+      - name: regenerate API and check for drift
+        run: |
+          nix run nixpkgs#just -- api
+          git diff --exit-code src/api
+
+      # Examples are installed by the default build; smoke-run them.
+      # example-bot-login is network-gated: it exits 0 without
+      # TD_BOT_TOKEN (real-network runs are opt-in, never CI).
+      - name: run examples
+        run: |
+          ./zig-out/bin/example-loopback
+          ./zig-out/bin/example-session
+          ./zig-out/bin/example-bot-login
+
+  bench-smoke:
+    name: benchmark smoke (multi section)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      # Not a performance gate: proves the benchmark binary runs and the
+      # fleet sections complete at every scale without hangs or leaks.
+      - name: just bench multi
+        run: nix run nixpkgs#just -- bench multi
+
+  fuzz-smoke:
+    name: fuzz corpora (deterministic pass)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      # The corpus half of tests/fuzz.zig already runs inside `just test`;
+      # this job documents where a longer coverage-guided session goes.
+      # A release gate runs the fuzzer for a fixed wall-clock budget:
+      # `nix run nixpkgs#zig -- build test --fuzz -Doptimize=ReleaseSafe`
+      - name: corpus tests
+        run: nix run nixpkgs#just -- test
